@@ -1,0 +1,2 @@
+Computer vision for a self driving car
+so far the car is controlled by a PID Controller that follows a spline curve 
