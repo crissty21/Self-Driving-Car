@@ -81,7 +81,7 @@ private:
 		class UChaosWheeledVehicleMovementComponent* ChaosWheeledVehicleComponent = nullptr;
 	UFUNCTION()
 		ARoad* GetClosestRoad();
-
+	bool CustomBreakSis = false;
 	//PID constants 
 	float Kp = 1.0f;
 	float Ki = 0.0f;

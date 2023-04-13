@@ -151,7 +151,7 @@ void AVehiclePawn::KeepRoad()
 	if (FMath::Abs(angle) * 2 >= CriticalAngle)
 	{
 		float update = MaxSpeed - (MaxSpeed - 10) * FMath::Abs(angle) * 2;
-		if (curentSpeed - update >= 20)
+		if (curentSpeed - update >= 10)
 			DesiredSpeed = update;
 	}
 	else
@@ -163,18 +163,18 @@ void AVehiclePawn::MoveForward(float value)
 {
 	if (ChaosWheeledVehicleComponent->GetHandbrakeInput())
 		return;
-	if (value >= 0)
+	if (value >= -BreakTolerance)
 	{
 		ChaosWheeledVehicleComponent->SetThrottleInput(value);
-		ChaosWheeledVehicleComponent->SetBrakeInput(0);
-		//turn off break lights
+		ChaosWheeledVehicleComponent->SetBrakeInput(0);		
+		//turn on break lights
 		if (BreakLightsState == true)
 		{
 			BreakLightsState = false;
 			BreakLights(false);
 		}
 	}
-	else if (value <= -BreakTolerance)
+	else 
 	{
 		ChaosWheeledVehicleComponent->SetBrakeInput(value * -1);
 		ChaosWheeledVehicleComponent->SetThrottleInput(0);
