@@ -71,13 +71,10 @@ protected:
 		float BreakTolerance = 0.5f;
 	UPROPERTY(EditDefaultsOnly)
 		bool DrawLine = false;
-	UPROPERTY(EditDefaultsOnly)
-		bool UseLandscapeSplineComponent = false;
 
 
 private:
 
-	void CreateSplineComponentFromLandscapeSplineSegment();
 	UPROPERTY()
 		class USplineComponent* FollowedSpline = nullptr;
 	UPROPERTY()

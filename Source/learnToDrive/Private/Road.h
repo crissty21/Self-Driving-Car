@@ -22,7 +22,7 @@ protected:
 
 public:	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	USplineComponent* SplineComp = nullptr;
+		USplineComponent* SplineComp = nullptr;
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
