@@ -55,6 +55,7 @@ void UTrainingDataCapturer::SendTrainingData()
 	{
 		return;
 	}
+
 	gameMode->AddImageToSave(photoPath, bitmap);
 	
 	//save data to csv 
@@ -64,10 +65,14 @@ void UTrainingDataCapturer::SendTrainingData()
 		UE_LOG(LogTemp, Error, TEXT("Invalid Parent"));
 		return;
 	}
-	
+	float steering = Parent->GetSteering();
+	if (steering != 0)
+	{
+		steering = FMath::RoundToInt(steering / 0.05f) * 0.05f;
+	}
 	TArray<FString> dataRow = {
 		photoPath,
-		FString::SanitizeFloat(Parent->GetSteering()),
+		FString::SanitizeFloat(steering),
 		FString::SanitizeFloat(Parent->GetThrottle()),
 		FString::SanitizeFloat(Parent->GetBreak()),
 		FString::SanitizeFloat(Parent->GetSpeed())

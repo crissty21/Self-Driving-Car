@@ -36,9 +36,6 @@ void AVehiclePawn::BeginPlay()
 
 	//cruise controll
 	PrevSpeedError = 30.f;
-	Kp = 0.5f;
-	Kd = 0.01f;
-	Ki = 0.f;
 
 	ARoad* Road = GetClosestRoad();
 	if (Road)

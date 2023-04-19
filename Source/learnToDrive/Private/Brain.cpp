@@ -70,8 +70,14 @@ void ABrain::CreateSplineFromLandscape(USplineComponent* spline)
 	};
 	TArray<FSplinePointInfo> SplinePointsInfo;
 	SplinePointsInfo.Reserve(sceneComponents.Num());
+	int32 index = 0;
 	for (USceneComponent* it : sceneComponents)
 	{
+		//drop hald of the points 
+		if (index++ % 2 == 0)
+		{
+			continue;
+		}
 		USplineMeshComponent* splineCom = (USplineMeshComponent*)it;
 		if (splineCom != nullptr)
 		{
