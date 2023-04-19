@@ -24,6 +24,8 @@ public:
 		int32 VideoHeight = 128;
 	UPROPERTY(EditDefaultsOnly)
 		bool bSaveTrainingData = false;
+	UPROPERTY(EditDefaultsOnly)
+		bool UseLandscapeSplineComponent = false;
 
 	void AddImageToSave(FString path, TArray<FColor> data);
 	void AddDataToSave(TArray<FString> Row);
@@ -33,6 +35,10 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+	class USplineComponent* GetSplineFromRoad();
+
+	void CreateSplineFromLandscape(class USplineComponent* spline);
+
 	EImageFormat ImageFormat;
 
 	FString CsvFilePath;

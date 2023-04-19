@@ -71,24 +71,25 @@ protected:
 		float BreakTolerance = 0.5f;
 	UPROPERTY(EditDefaultsOnly)
 		bool DrawLine = false;
-	UPROPERTY(EditDefaultsOnly)
-		bool UseLandscapeSplineComponent = false;
+		//PID constants 
+	UPROPERTY(EditAnywhere, Category = "PID constants")
+		float Kp = 0.8f;
+	UPROPERTY(EditAnywhere, Category = "PID constants")
+		float Ki = 0.0f;
+	UPROPERTY(EditAnywhere, Category = "PID constants")
+		float Kd = 0.05f;
+
 
 
 private:
 
-	void CreateSplineComponentFromLandscapeSplineSegment();
 	UPROPERTY()
 		class USplineComponent* FollowedSpline = nullptr;
 	UPROPERTY()
 		class UChaosWheeledVehicleMovementComponent* ChaosWheeledVehicleComponent = nullptr;
 	UFUNCTION()
 		ARoad* GetClosestRoad();
-
-	//PID constants 
-	float Kp = 1.0f;
-	float Ki = 0.0f;
-	float Kd = 0.0f;
+	bool CustomBreakSis = false;
 	
 	float PrevSpeedError = 30.f;
 
