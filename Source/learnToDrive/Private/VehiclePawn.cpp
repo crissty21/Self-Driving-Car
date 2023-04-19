@@ -4,11 +4,8 @@
 #include "VehiclePawn.h"
 #include "DrawDebugHelpers.h"
 #include "ChaosWheeledVehicleMovementComponent.h"
-#include <Kismet/GameplayStatics.h>
-#include "Components/SplineMeshComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Components/SplineComponent.h"
-#include "LandscapeSplinesComponent.h"
-#include "Landscape.h"
 
 #include "Brain.h"
 
@@ -29,11 +26,6 @@ AVehiclePawn::AVehiclePawn()
 void AVehiclePawn::BeginPlay()
 {
 	Super::BeginPlay();
-    if (UseLandscapeSplineComponent)
-	{
-		FollowedSpline = NewObject<USplineComponent>(this,USplineComponent::StaticClass(), TEXT("SplineComponent"), RF_Transient);
-		FollowedSpline->RegisterComponent();
-	}
 
 	ChaosWheeledVehicleComponent = Cast<UChaosWheeledVehicleMovementComponent>(GetVehicleMovementComponent());
 	if (ChaosWheeledVehicleComponent == nullptr)
@@ -44,22 +36,13 @@ void AVehiclePawn::BeginPlay()
 
 	//cruise controll
 	PrevSpeedError = 30.f;
-	Kp = 0.5f;
-	Kd = 0.01f;
-	Ki = 0.f;
 
-	if (UseLandscapeSplineComponent)
+	ARoad* Road = GetClosestRoad();
+	if (Road)
 	{
-		CreateSplineComponentFromLandscapeSplineSegment();
+		FollowedSpline = Road->SplineComp;
 	}
-	else
-	{
-		ARoad* Road = GetClosestRoad();
-		if (Road)
-		{
-			FollowedSpline = Road->SplineComp;
-		}
-	}
+	
 	//steering
 	FrontPoint->SetRelativeLocation(FVector(130, 0, 0));
 	BackPoint->SetRelativeLocation(FVector(-125, 0, 0));
@@ -165,7 +148,7 @@ void AVehiclePawn::KeepRoad()
 	if (FMath::Abs(angle) * 2 >= CriticalAngle)
 	{
 		float update = MaxSpeed - (MaxSpeed - 10) * FMath::Abs(angle) * 2;
-		if (curentSpeed - update >= 20)
+		if (curentSpeed - update >= 10)
 			DesiredSpeed = update;
 	}
 	else
@@ -177,18 +160,18 @@ void AVehiclePawn::MoveForward(float value)
 {
 	if (ChaosWheeledVehicleComponent->GetHandbrakeInput())
 		return;
-	if (value >= 0)
+	if (value >= -BreakTolerance)
 	{
 		ChaosWheeledVehicleComponent->SetThrottleInput(value);
-		ChaosWheeledVehicleComponent->SetBrakeInput(0);
-		//turn off break lights
+		ChaosWheeledVehicleComponent->SetBrakeInput(0);		
+		//turn on break lights
 		if (BreakLightsState == true)
 		{
 			BreakLightsState = false;
 			BreakLights(false);
 		}
 	}
-	else if (value <= -BreakTolerance)
+	else 
 	{
 		ChaosWheeledVehicleComponent->SetBrakeInput(value * -1);
 		ChaosWheeledVehicleComponent->SetThrottleInput(0);
@@ -264,102 +247,6 @@ float AVehiclePawn::GetSpeed()
 	}
 	return ChaosWheeledVehicleComponent->GetForwardSpeedMPH();
 }
-
-void AVehiclePawn::CreateSplineComponentFromLandscapeSplineSegment()
-{
-	//////
-	// Data gather 
-	//////
-
-	//get the road from the landscape
-	ALandscape* landscape = (ALandscape*)UGameplayStatics::GetActorOfClass(GetWorld(), ALandscape::StaticClass());
-	ULandscapeSplinesComponent* landscapeSplineComponent = (ULandscapeSplinesComponent*)landscape->GetComponentByClass(ULandscapeSplinesComponent::StaticClass());
-	if (landscapeSplineComponent == nullptr)
-	{
-		UE_LOG(LogTemp, Error, TEXT("No Road On this landscape"));
-		return;
-	}
-
-	//get the spline secments from the newly found road 
-	TArray<USceneComponent*> sceneComponents;
-	landscapeSplineComponent->GetChildrenComponents(false, sceneComponents);
-
-	struct FSplinePointInfo
-	{
-		FVector WorldLocation;
-		FVector Tangent;
-		FVector Scale;
-		FRotator Rotation;
-	};
-	TArray<FSplinePointInfo> SplinePointsInfo;
-	SplinePointsInfo.Reserve(sceneComponents.Num());
-	for (USceneComponent* it : sceneComponents)
-	{
-		USplineMeshComponent* splineCom = (USplineMeshComponent*)it;
-		if (splineCom != nullptr)
-		{
-			FSplinePointInfo PointInfo;
-			PointInfo.WorldLocation = splineCom->GetComponentLocation();
-			PointInfo.Tangent = splineCom->GetStartTangent();
-			PointInfo.Rotation = splineCom->GetComponentRotation();
-			PointInfo.Scale = splineCom->GetComponentScale();
-			SplinePointsInfo.Add(PointInfo);
-		}
-	}
-
-
-	//////
-	// Data sorter
-	//////
-
-	// Find the new order of spline points based on the closest distance (sort the list)
-	TArray<FSplinePointInfo> NewSplinePointsOrder;
-	NewSplinePointsOrder.Reserve(sceneComponents.Num());
-	NewSplinePointsOrder.Add(SplinePointsInfo[0]);
-	SplinePointsInfo.RemoveAt(0);
-
-	while (SplinePointsInfo.Num() > 0)
-	{
-		FSplinePointInfo& LastPoint = NewSplinePointsOrder.Last();
-		float MinDistanceSquared = FLT_MAX;
-		int32 ClosestPointIndex = INDEX_NONE;
-
-		for (int32 i = 0; i < SplinePointsInfo.Num(); ++i)
-		{
-			float DistanceSquared = FVector::DistSquared(LastPoint.WorldLocation, SplinePointsInfo[i].WorldLocation);
-			if (DistanceSquared < MinDistanceSquared)
-			{
-				MinDistanceSquared = DistanceSquared;
-				ClosestPointIndex = i;
-			}
-		}
-
-		if (ClosestPointIndex != INDEX_NONE)
-		{
-			NewSplinePointsOrder.Add(SplinePointsInfo[ClosestPointIndex]);
-			SplinePointsInfo.RemoveAt(ClosestPointIndex);
-		}
-	}
-
-
-	//////
-	// new spline creation 
-	//////
-
-	FollowedSpline->SetWorldLocation(landscapeSplineComponent->GetComponentLocation());
-	FollowedSpline->ClearSplinePoints();
-
-	for (int32 i = 0; i < NewSplinePointsOrder.Num(); ++i)
-	{
-		FollowedSpline->AddSplineWorldPoint(NewSplinePointsOrder[i].WorldLocation);
-		FollowedSpline->SetTangentAtSplinePoint(i, NewSplinePointsOrder[i].Tangent, ESplineCoordinateSpace::World, false);
-		FollowedSpline->SetRotationAtSplinePoint(i, NewSplinePointsOrder[i].Rotation, ESplineCoordinateSpace::World, false);
-		FollowedSpline->SetScaleAtSplinePoint(i, NewSplinePointsOrder[i].Scale, false);
-	}
-
-	FollowedSpline->UpdateSpline();
-}
-
 
 ARoad* AVehiclePawn::GetClosestRoad()
 {
