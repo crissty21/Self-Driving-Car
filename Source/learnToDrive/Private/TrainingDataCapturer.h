@@ -39,7 +39,8 @@ private:
 		FString ImageFilePath;
 	UPROPERTY()
 		FString extension;
-
+	UPROPERTY()
+		class UNNI_CNN* NNIInterface = nullptr;
 
 	int32 ImageId = 0;
 	float DT;

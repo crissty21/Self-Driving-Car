@@ -1,21 +1,22 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Brain.h"
+#include "NNI_CNN.h"
 #include "VehiclePawn.h"
 #include "TrainingDataCapturer.h"
 
 UTrainingDataCapturer::UTrainingDataCapturer()
 {
-    PrimaryComponentTick.bCanEverTick = true;
-
     ImageFilePath = FPaths::ProjectSavedDir() / TEXT("ScreenShots/CameraView");
     extension = TEXT("jpeg");
+
+	NNIInterface = CreateDefaultSubobject<UNNI_CNN>("NNIInterface");
 }
 
 void UTrainingDataCapturer::BeginPlay()
 {
     Super::BeginPlay();
-
+	
 	gameMode = (ABrain*)GetWorld()->GetAuthGameMode();
 	if (gameMode == nullptr)
 	{
@@ -30,9 +31,8 @@ void UTrainingDataCapturer::BeginPlay()
 	}
 
     RenderTarget = NewObject<UTextureRenderTarget2D>();
-    RenderTarget->InitCustomFormat(VideoWidth, VideoHeight, PF_B8G8R8A8, false);
+    RenderTarget->InitCustomFormat(VideoWidth, VideoHeight, PF_B8G8R8A8, false); //BGRA
     TextureTarget = RenderTarget;
-
 }
 void UTrainingDataCapturer::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {

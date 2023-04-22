@@ -21,6 +21,7 @@ AVehiclePawn::AVehiclePawn()
 	FrontPoint->SetupAttachment(RootComponent);
 	BackPoint->SetupAttachment(RootComponent);
 	AdvancePoint->SetupAttachment(RootComponent);
+
 }
 
 void AVehiclePawn::BeginPlay()
@@ -42,7 +43,7 @@ void AVehiclePawn::BeginPlay()
 	{
 		FollowedSpline = Road->SplineComp;
 	}
-	
+
 	//steering
 	FrontPoint->SetRelativeLocation(FVector(130, 0, 0));
 	BackPoint->SetRelativeLocation(FVector(-125, 0, 0));
@@ -51,20 +52,22 @@ void AVehiclePawn::BeginPlay()
 	ABrain* gameMode = (ABrain*)GetWorld()->GetAuthGameMode();
 	if (gameMode)
 	{
+		TrainingDataCapturer = NewObject<UTrainingDataCapturer>(this, UTrainingDataCapturer::StaticClass(), TEXT("DataCapturerComponent"), RF_Transient);
+		TrainingDataCapturer->RegisterComponent();
+		TrainingDataCapturer->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+
+		TrainingDataCapturer->SetRelativeLocation(FVector(142, 0, 150));
+		TrainingDataCapturer->SetRelativeRotation(FRotator(-10, 0, 0));
+		TrainingDataCapturer->FOVAngle = 120;
+		TrainingDataCapturer->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
+		TrainingDataCapturer->bCaptureEveryFrame = false;
+		TrainingDataCapturer->Parent = this;
+		TrainingDataCapturer->PersonalId = PersonalID;
+		TrainingDataCapturer->PrimaryComponentTick.bCanEverTick = false;
 		if (gameMode->bSaveTrainingData)
 		{
-			TrainingDataCapturer = NewObject<UTrainingDataCapturer>(this, UTrainingDataCapturer::StaticClass(), TEXT("DataCapturerComponent"), RF_Transient);
-			TrainingDataCapturer->RegisterComponent();
-			TrainingDataCapturer->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-
-			TrainingDataCapturer->SetRelativeLocation(FVector(142, 0, 150));
-			TrainingDataCapturer->SetRelativeRotation(FRotator(-10, 0, 0));
-			TrainingDataCapturer->FOVAngle = 120;
-			TrainingDataCapturer->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
-			TrainingDataCapturer->bCaptureEveryFrame = false;
-			TrainingDataCapturer->Parent = this;
-			TrainingDataCapturer->PersonalId = PersonalID;
-			TrainingDataCapturer->PrimaryComponentTick.TickInterval = 1.0f / TickingFreq; 
+			TrainingDataCapturer->PrimaryComponentTick.bCanEverTick = true;
+			TrainingDataCapturer->PrimaryComponentTick.TickInterval = 1.0f / TickingFreq;
 		}
 	}
 	else
@@ -87,7 +90,7 @@ void AVehiclePawn::Tick(float DeltaTime)
 	if (FollowedSpline)
 	{
 		KeepRoad();
-		CruiseControll(DeltaTime);	
+		CruiseControll(DeltaTime);
 	}
 }
 
@@ -110,38 +113,38 @@ void AVehiclePawn::CruiseControll(float DeltaTime)
 	float derivativeError = (errorKPH - PrevSpeedError) / DeltaTime;
 	float d = Kd * derivativeError;
 	//derivate
-	
+
 	PrevSpeedError = errorKPH;
 
 	float value = FMath::Clamp(p + i + d, -1.0f, 1.0f);
-	
+
 	MoveForward(value);
 }
 
 void AVehiclePawn::KeepRoad()
 {
-	
+
 	FVector advancePointCoordinates = AdvancePoint->GetComponentLocation();
 	FVector frontPointCoordinates = FrontPoint->GetComponentLocation();
 	FVector backPointCoordinates = BackPoint->GetComponentLocation();
 
 	//get closest point on spline
-	FVector coordOnSpline = FollowedSpline->FindLocationClosestToWorldLocation(advancePointCoordinates,ESplineCoordinateSpace::World);
+	FVector coordOnSpline = FollowedSpline->FindLocationClosestToWorldLocation(advancePointCoordinates, ESplineCoordinateSpace::World);
 	coordOnSpline.Z = advancePointCoordinates.Z;
 
 	if (DrawLine)
 	{
-		DrawDebugLine(GetWorld(), frontPointCoordinates, coordOnSpline, FColor::Red, false, -1,0,10);
+		DrawDebugLine(GetWorld(), frontPointCoordinates, coordOnSpline, FColor::Red, false, -1, 0, 10);
 	}
 
 	FVector L = frontPointCoordinates - backPointCoordinates;
 	FVector ld = coordOnSpline - backPointCoordinates;
 	float a = L.HeadingAngle() - ld.HeadingAngle();
-	
-	float LDist = FVector::Dist(backPointCoordinates,frontPointCoordinates);
-	float angle = (atan((sin(a)*LDist * 2)/ld.Size()));
 
-	ChaosWheeledVehicleComponent->SetSteeringInput(-angle*2);
+	float LDist = FVector::Dist(backPointCoordinates, frontPointCoordinates);
+	float angle = (atan((sin(a) * LDist * 2) / ld.Size()));
+
+	ChaosWheeledVehicleComponent->SetSteeringInput(-angle * 2);
 
 	//set desired speed in order to be able to take coreners
 	float curentSpeed = GetVehicleMovement()->GetForwardSpeed() * 0.036;
@@ -163,7 +166,7 @@ void AVehiclePawn::MoveForward(float value)
 	if (value >= -BreakTolerance)
 	{
 		ChaosWheeledVehicleComponent->SetThrottleInput(value);
-		ChaosWheeledVehicleComponent->SetBrakeInput(0);		
+		ChaosWheeledVehicleComponent->SetBrakeInput(0);
 		//turn on break lights
 		if (BreakLightsState == true)
 		{
@@ -171,7 +174,7 @@ void AVehiclePawn::MoveForward(float value)
 			BreakLights(false);
 		}
 	}
-	else 
+	else
 	{
 		ChaosWheeledVehicleComponent->SetBrakeInput(value * -1);
 		ChaosWheeledVehicleComponent->SetThrottleInput(0);
@@ -241,7 +244,7 @@ float AVehiclePawn::GetBreak()
 
 float AVehiclePawn::GetSpeed()
 {
-    if (ChaosWheeledVehicleComponent == nullptr)
+	if (ChaosWheeledVehicleComponent == nullptr)
 	{
 		return 0;
 	}
