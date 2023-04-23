@@ -25,7 +25,7 @@ float UTrainingDataCapturer::RunPrediction()
 	cv::Mat colorData = cv::Mat(cv::Size(renderTargetResource->GetSizeXY().X, renderTargetResource->GetSizeXY().Y), CV_8UC4, colorDataArray.GetData());
 	//TArray<float> in = NNIInterface->PreProcessImage(colorData);
 	float result = NNIInterface->RunModel(colorData);
-	UE_LOG(LogTemp, Warning, TEXT("%f"), result);
+	UE_LOG(LogTemp, Warning, TEXT("Predicted steering: %f"), result);
 
 	return 0.0f;
 }

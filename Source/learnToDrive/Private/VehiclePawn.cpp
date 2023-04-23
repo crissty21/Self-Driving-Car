@@ -27,7 +27,7 @@ AVehiclePawn::AVehiclePawn()
 void AVehiclePawn::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	ChaosWheeledVehicleComponent = Cast<UChaosWheeledVehicleMovementComponent>(GetVehicleMovementComponent());
 	if (ChaosWheeledVehicleComponent == nullptr)
 	{
@@ -74,6 +74,16 @@ void AVehiclePawn::BeginPlay()
 	{
 		UE_LOG(LogTemp, Error, TEXT("Unable to cast to ABrain in VehiclePawn!"));
 	}
+
+	// Ensure the actor has an input component
+	if (!InputComponent)
+	{
+		InputComponent = NewObject<UInputComponent>(this);
+		InputComponent->RegisterComponent();
+	}
+
+	// Bind input events
+	InputComponent->BindAction("Prediction", IE_Pressed, this, &AVehiclePawn::Prediction);
 }
 
 void AVehiclePawn::Tick(float DeltaTime)
@@ -249,6 +259,12 @@ float AVehiclePawn::GetSpeed()
 		return 0;
 	}
 	return ChaosWheeledVehicleComponent->GetForwardSpeedMPH();
+}
+
+void AVehiclePawn::Prediction()
+{
+	TrainingDataCapturer->RunPrediction();
+	UE_LOG(LogTemp, Warning, TEXT("Real steering: %f"), GetSteering())
 }
 
 ARoad* AVehiclePawn::GetClosestRoad()

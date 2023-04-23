@@ -79,7 +79,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "PID constants")
 		float Kd = 0.05f;
 
-
+	void Prediction();
 
 private:
 

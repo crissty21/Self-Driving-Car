@@ -70,21 +70,23 @@ TArray<float> UNNI_CNN::PreProcessImage(cv::Mat image)
 	cv::GaussianBlur(image, image, cv::Size(3, 3), 0);
 	cv::resize(image, image, cv::Size(100, 100));
 
+
 	//spaghetificare
-	cv::Mat float_image;
-	image.convertTo(float_image, CV_32FC3);
 
-	cv::Mat transposed_image = float_image.reshape(1,1);
-	//cv::transpose(float_image.reshape(1, 1), transposed_image);
+	TArray<float> ueArray;
+	ueArray.SetNumUninitialized(image.total() * image.channels());
 
-	TArray<float> ImageData;
-	ImageData.SetNumUninitialized(transposed_image.total());
-	UE_LOG(LogTemp, Warning, TEXT("%i"), ImageData.Num());
+	for (int32 row = 0; row < image.rows; ++row) {
+		for (int32 col = 0; col < image.cols; ++col) {
+			cv::Vec3b pixel = image.at<cv::Vec3b>(row, col);
 
-	for (size_t i = 0; i < ImageData.Num(); ++i) {
-		ImageData[i] = transposed_image.at<float>(0, i) / 255.0f;
-		UE_LOG(LogTemp, Warning, TEXT("%f"), ImageData[i]);
+			for (int32 channel = 0; channel < image.channels(); ++channel) {
+				int32 index = (row * image.cols * image.channels()) + (col * image.channels()) + channel;
+				ueArray[index] = pixel[channel] / 255.0f;
+			}
+		}
 	}
-	return ImageData;
+
+	return ueArray;
 }
 
