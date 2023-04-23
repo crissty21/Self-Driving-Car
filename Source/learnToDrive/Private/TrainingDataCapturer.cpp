@@ -13,6 +13,21 @@ UTrainingDataCapturer::UTrainingDataCapturer()
 	NNIInterface = CreateDefaultSubobject<UNNI_CNN>("NNIInterface");
 }
 
+float UTrainingDataCapturer::RunPrediction()
+{
+	TArray<FColor> colorDataArray;
+	//read the pixels
+	FRenderTarget* renderTargetResource = TextureTarget->GameThread_GetRenderTargetResource();
+	renderTargetResource->ReadPixels(colorDataArray);
+	//create a mat with the data from pixels 
+	cv::Mat colorData = cv::Mat(cv::Size(renderTargetResource->GetSizeXY().X, renderTargetResource->GetSizeXY().Y), CV_8UC4, colorDataArray.GetData());
+	//TArray<float> in = NNIInterface->PreProcessImage(colorData);
+	float result = NNIInterface->RunModel(colorData);
+	UE_LOG(LogTemp, Warning, TEXT("%f"), result);
+
+	return 0.0f;
+}
+
 void UTrainingDataCapturer::BeginPlay()
 {
     Super::BeginPlay();
@@ -33,6 +48,8 @@ void UTrainingDataCapturer::BeginPlay()
     RenderTarget = NewObject<UTextureRenderTarget2D>();
     RenderTarget->InitCustomFormat(VideoWidth, VideoHeight, PF_B8G8R8A8, false); //BGRA
     TextureTarget = RenderTarget;
+
+	RunPrediction();
 }
 void UTrainingDataCapturer::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {

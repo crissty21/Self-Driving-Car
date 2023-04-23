@@ -25,6 +25,9 @@ public:
 
 	int8 TickingFreq = 1;
 
+	UFUNCTION()
+		float RunPrediction();
+
 protected:
 	virtual void BeginPlay() override;
 	UPROPERTY(EditDefaultsOnly)

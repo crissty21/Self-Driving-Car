@@ -4,12 +4,7 @@
 UNNI_CNN::UNNI_CNN()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-	Network = nullptr;
-}
 
-void UNNI_CNN::BeginPlay()
-{
-	Super::BeginPlay();
 	const FString& ONNXModelFilePath = TEXT("C:/Users/crist/Desktop/The_Model.onnx");
 	// Create Network object if null
 	if (Network == nullptr) {
@@ -29,6 +24,13 @@ void UNNI_CNN::BeginPlay()
 			Network = nullptr;
 		}
 	}
+
+}
+
+void UNNI_CNN::BeginPlay()
+{
+	Super::BeginPlay();
+	
 }
 
 float UNNI_CNN::RunModel(cv::Mat image)
@@ -41,9 +43,8 @@ float UNNI_CNN::RunModel(cv::Mat image)
 	float result = 0.f;
 
 	// Fill input neural tensor
-	const cv::Mat InArray = PreProcessImage(image);
-	Network->SetInputFromVoidPointerCopy(&InArray);
-	//Network->SetInputFromArrayCopy(InArray);
+	const TArray<float> InArray = PreProcessImage(image); 
+	Network->SetInputFromArrayCopy(InArray); 
 
 	UE_LOG(LogTemp, Display, TEXT("Input tensor: %s."), *Network->GetInputTensor().ToString());
 
@@ -62,7 +63,7 @@ float UNNI_CNN::RunModel(cv::Mat image)
 	return result;
 }
 
-cv::Mat UNNI_CNN::PreProcessImage(cv::Mat image)
+TArray<float> UNNI_CNN::PreProcessImage(cv::Mat image)
 {
 	if (image.empty()) {
 		return {};
@@ -83,9 +84,29 @@ cv::Mat UNNI_CNN::PreProcessImage(cv::Mat image)
 	cv::Mat ResizedImg;
 	cv::resize(BlurredImg, ResizedImg, cv::Size(100, 100));
 
-	// Normalize values
-	cv::Mat NormalizedImg = ResizedImg / 255.0;
+	// reshape to 1D
+	ResizedImg = ResizedImg.reshape(1, 1);
+	
+	// uint_8, [0, 255] -> float, [0, 1]
+	float x = 1. / 255.f;
+	TArray<float> vec;
+	vec.Reserve(ResizedImg.rows * ResizedImg.cols);
+	for (int i = 0; i < ResizedImg.rows; i++) {
+		for (int j = 0; j < ResizedImg.cols; j++) {
+			vec.Add(static_cast<float>(ResizedImg.at<uchar>(i, j)) * x);
+		}
+	}
 
-	return NormalizedImg;
+	//cv::OutputArray vec;
+	//image.convertTo(vec, CV_32FC1, 1. / 255);
+
+	// HWC -> CHW
+	TArray<float> output;
+	for (size_t ch = 0; ch < 3; ++ch) {
+		for (size_t i = ch; i < vec.Num(); i += 3) {
+			output.Emplace(vec[i]);
+		}
+	}
+	return output;
 }
 

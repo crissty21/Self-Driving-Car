@@ -12,6 +12,7 @@
 #include <ThirdParty/OpenCV/include/opencv2/highgui/highgui.hpp>
 
 #include <ThirdParty/OpenCV/include/opencv2/core.hpp>
+#include <ThirdParty/OpenCV/include/opencv2/dnn.hpp>
 #include "PostOpenCVHeaders.h"
 #include "NeuralNetwork.h"
 
@@ -37,6 +38,6 @@ public:
 	UPROPERTY(Transient)
 		UNeuralNetwork* Network = nullptr;
 	float RunModel(cv::Mat image);
-	cv::Mat PreProcessImage(cv::Mat image);
+	TArray<float> PreProcessImage(cv::Mat image);
 		
 };
