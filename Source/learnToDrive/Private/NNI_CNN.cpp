@@ -69,10 +69,8 @@ TArray<float> UNNI_CNN::PreProcessImage(cv::Mat image)
 	cv::cvtColor(image, image, cv::COLOR_BGRA2RGB);
 	cv::GaussianBlur(image, image, cv::Size(3, 3), 0);
 	cv::resize(image, image, cv::Size(100, 100));
-	
-	UE_LOG(LogTemp, Warning, TEXT("Size of image: %i"), image.channels());
 
-	//spachetificare
+	//spaghetificare
 	// reshape to 1D
 	image = image.reshape(1, 1);
 
@@ -81,14 +79,14 @@ TArray<float> UNNI_CNN::PreProcessImage(cv::Mat image)
 	TArray<float> output;
 
 	output.Reserve(image.rows * image.cols);
-
+	float val;
 	float coef = 1. / 255.f;
 	for (size_t ch = 0; ch < 3; ++ch) {
 		for (int j = ch; j < image.cols; j+=3) {
-			output.Add(static_cast<float>(image.at<uchar>(0, j)) * coef);
+			val = static_cast<float>(image.at<uint8>(0, j)) * coef;
+			output.Add(val);
 		}
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Size of image: %i"), output.Num());
 
 	//cv::OutputArray vec;
 	//image.convertTo(vec, CV_32FC1, 1. / 255);

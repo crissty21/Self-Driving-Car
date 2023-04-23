@@ -15,6 +15,8 @@ UTrainingDataCapturer::UTrainingDataCapturer()
 
 float UTrainingDataCapturer::RunPrediction()
 {
+	FString photoPath = FString::Printf(TEXT("%s_%d%d.%s"), *ImageFilePath, PersonalId, ImageId++, *extension);
+	CaptureScene();
 	TArray<FColor> colorDataArray;
 	//read the pixels
 	FRenderTarget* renderTargetResource = TextureTarget->GameThread_GetRenderTargetResource();
