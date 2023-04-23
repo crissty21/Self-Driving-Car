@@ -12,7 +12,7 @@ UNNI_CNN::UNNI_CNN()
 
 		// Load model from file.
 		// Set Device
-		Network->SetDeviceType(ENeuralDeviceType::GPU);
+		Network->SetDeviceType(ENeuralDeviceType::CPU);
 		// Check that the network was successfully loaded
 		if (Network->Load(ONNXModelFilePath))
 		{
@@ -45,10 +45,7 @@ float UNNI_CNN::RunModel(cv::Mat image)
 	// Fill input neural tensor
 	const TArray<float> InArray = PreProcessImage(image); 
 	Network->SetInputFromArrayCopy(InArray); 
-
-	UE_LOG(LogTemp, Display, TEXT("Input tensor: %s."), *Network->GetInputTensor().ToString());
-
-
+	
 	// Run UNeuralNetwork
 	Network->Run();
 
@@ -57,8 +54,6 @@ float UNNI_CNN::RunModel(cv::Mat image)
 		//const FNeuralTensor& OutputTensor = Network->GetOutputTensor();
 	TArray<float> OutputTensor = Network->GetOutputTensor().GetArrayCopy<float>();
 	result = OutputTensor[0];
-	UE_LOG(LogTemp, Warning, TEXT("Output is: %f"), result);
-
 	
 	return result;
 }
@@ -70,36 +65,34 @@ TArray<float> UNNI_CNN::PreProcessImage(cv::Mat image)
 	}
 	
 	// Crop image to remove unnecessary features
-	cv::Mat CroppedImg = image(cv::Rect(0, 60, image.cols, 140));
+	//image = image(cv::Rect(0, 60, image.cols, 140));
+	cv::cvtColor(image, image, cv::COLOR_BGRA2RGB);
+	cv::GaussianBlur(image, image, cv::Size(3, 3), 0);
+	cv::resize(image, image, cv::Size(100, 100));
+	
+	UE_LOG(LogTemp, Warning, TEXT("Size of image: %i"), image.channels());
 
-	// Convert image to YUV color space
-	cv::Mat YuvImg;
-	cv::cvtColor(image, YuvImg, cv::COLOR_RGB2YUV);
-
-	// Apply Gaussian blur
-	cv::Mat BlurredImg;
-	cv::GaussianBlur(YuvImg, BlurredImg, cv::Size(3, 3), 0);
-
-	// Resize image for easier processing
-	cv::Mat ResizedImg;
-	cv::resize(BlurredImg, ResizedImg, cv::Size(100, 100));
-
+	//spachetificare
 	// reshape to 1D
-	ResizedImg = ResizedImg.reshape(1, 1);
+	image = image.reshape(1, 1);
+
 	
 	// uint_8, [0, 255] -> float, [0, 1]
-	float x = 1. / 255.f;
-	TArray<float> vec;
-	vec.Reserve(ResizedImg.rows * ResizedImg.cols);
-	for (int i = 0; i < ResizedImg.rows; i++) {
-		for (int j = 0; j < ResizedImg.cols; j++) {
-			vec.Add(static_cast<float>(ResizedImg.at<uchar>(i, j)) * x);
+	TArray<float> output;
+
+	output.Reserve(image.rows * image.cols);
+
+	float coef = 1. / 255.f;
+	for (size_t ch = 0; ch < 3; ++ch) {
+		for (int j = ch; j < image.cols; j+=3) {
+			output.Add(static_cast<float>(image.at<uchar>(0, j)) * coef);
 		}
 	}
+	UE_LOG(LogTemp, Warning, TEXT("Size of image: %i"), output.Num());
 
 	//cv::OutputArray vec;
 	//image.convertTo(vec, CV_32FC1, 1. / 255);
-
+	/*
 	// HWC -> CHW
 	TArray<float> output;
 	for (size_t ch = 0; ch < 3; ++ch) {
@@ -107,6 +100,7 @@ TArray<float> UNNI_CNN::PreProcessImage(cv::Mat image)
 			output.Emplace(vec[i]);
 		}
 	}
+	*/
 	return output;
 }
 

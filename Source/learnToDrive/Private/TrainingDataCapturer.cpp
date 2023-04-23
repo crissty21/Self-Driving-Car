@@ -18,7 +18,7 @@ float UTrainingDataCapturer::RunPrediction()
 	TArray<FColor> colorDataArray;
 	//read the pixels
 	FRenderTarget* renderTargetResource = TextureTarget->GameThread_GetRenderTargetResource();
-	renderTargetResource->ReadPixels(colorDataArray);
+	renderTargetResource->ReadPixels(colorDataArray); //BGRA 8
 	//create a mat with the data from pixels 
 	cv::Mat colorData = cv::Mat(cv::Size(renderTargetResource->GetSizeXY().X, renderTargetResource->GetSizeXY().Y), CV_8UC4, colorDataArray.GetData());
 	//TArray<float> in = NNIInterface->PreProcessImage(colorData);
