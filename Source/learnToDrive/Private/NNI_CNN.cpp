@@ -1,10 +1,12 @@
 #include "NNI_CNN.h"
+#include "NeuralNetwork.h"
+
 
 
 UNNI_CNN::UNNI_CNN()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-
+	 
 	const FString& ONNXModelFilePath = TEXT("C:/Users/crist/Desktop/The_Model1.onnx");
 	// Create Network object if null
 	if (Network == nullptr) {
@@ -33,7 +35,7 @@ void UNNI_CNN::BeginPlay()
 	
 }
 
-float UNNI_CNN::RunModel(cv::Mat image)
+float UNNI_CNN::RunModel(TArray<FColor> image, int16 width, int16 height)
 {
 	if (Network == nullptr)
 	{
@@ -42,8 +44,10 @@ float UNNI_CNN::RunModel(cv::Mat image)
 	}
 	float result = 0.f;
 
+	//create a mat with the data from pixels 
+	cv::Mat colorData = cv::Mat(cv::Size(width, height), CV_8UC4, image.GetData());
 	// Fill input neural tensor
-	const TArray<float> InArray = PreProcessImage(image); 
+	const TArray<float> InArray = PreProcessImage(colorData); 
 	Network->SetInputFromArrayCopy(InArray); 
 	
 	// Run UNeuralNetwork

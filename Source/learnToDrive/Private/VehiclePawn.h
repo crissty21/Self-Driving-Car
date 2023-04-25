@@ -6,6 +6,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "TrainingDataCapturer.h"
+#include "NeuralNetwork.h"
 
 #include "VehiclePawn.generated.h"
 
@@ -55,6 +56,8 @@ protected:
 		USceneComponent* BackPoint = nullptr;
 	UPROPERTY(EditAnywhere)
 		USceneComponent* AdvancePoint = nullptr;
+	UPROPERTY(EditDefaultsOnly)
+		UNeuralNetwork* ConvolutionalNetwork = nullptr;
 
 	UPROPERTY(EditAnywhere)
 		UTrainingDataCapturer* TrainingDataCapturer = nullptr;

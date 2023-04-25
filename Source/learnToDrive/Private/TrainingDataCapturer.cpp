@@ -1,9 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Brain.h"
-#include "NNI_CNN.h"
 #include "VehiclePawn.h"
-#include "TrainingDataCapturer.h"
 
 UTrainingDataCapturer::UTrainingDataCapturer()
 {
@@ -21,14 +19,19 @@ float UTrainingDataCapturer::RunPrediction()
 	//read the pixels
 	FRenderTarget* renderTargetResource = TextureTarget->GameThread_GetRenderTargetResource();
 	renderTargetResource->ReadPixels(colorDataArray); //BGRA 8
-	//create a mat with the data from pixels 
-	cv::Mat colorData = cv::Mat(cv::Size(renderTargetResource->GetSizeXY().X, renderTargetResource->GetSizeXY().Y), CV_8UC4, colorDataArray.GetData());
-	//TArray<float> in = NNIInterface->PreProcessImage(colorData);
-	float result = NNIInterface->RunModel(colorData);
+	
+	float result = NNIInterface->RunModel(colorDataArray, 
+		renderTargetResource->GetSizeXY().X,
+		renderTargetResource->GetSizeXY().Y);
 	UE_LOG(LogTemp, Warning, TEXT("Predicted steering: %f"), result);
 
 	return 0.0f;
 }
+void UTrainingDataCapturer::SetNNI(UNeuralNetwork* Network)
+{
+	NNIInterface->Network = Network;
+}
+
 
 void UTrainingDataCapturer::BeginPlay()
 {

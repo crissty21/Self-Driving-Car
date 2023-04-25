@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "Kismet/KismetRenderingLibrary.h"
+#include "NNI_CNN.h"
 
 #include "TrainingDataCapturer.generated.h"
 
@@ -27,6 +28,8 @@ public:
 
 	UFUNCTION()
 		float RunPrediction();
+	UFUNCTION()
+		void SetNNI(UNeuralNetwork* Network);
 
 protected:
 	virtual void BeginPlay() override;
@@ -43,7 +46,7 @@ private:
 	UPROPERTY()
 		FString extension;
 	UPROPERTY()
-		class UNNI_CNN* NNIInterface = nullptr;
+		UNNI_CNN* NNIInterface = nullptr;
 
 	int32 ImageId = 0;
 	float DT;

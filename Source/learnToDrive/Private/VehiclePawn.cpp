@@ -69,6 +69,10 @@ void AVehiclePawn::BeginPlay()
 			TrainingDataCapturer->PrimaryComponentTick.bCanEverTick = true;
 			TrainingDataCapturer->PrimaryComponentTick.TickInterval = 1.0f / TickingFreq;
 		}
+		else
+		{
+			TrainingDataCapturer->SetNNI(ConvolutionalNetwork);
+		}
 	}
 	else
 	{
