@@ -177,28 +177,8 @@ void AVehiclePawn::MoveForward(float value)
 {
 	if (ChaosWheeledVehicleComponent->GetHandbrakeInput())
 		return;
-	if (value >= -BreakTolerance)
-	{
-		ChaosWheeledVehicleComponent->SetThrottleInput(value);
-		ChaosWheeledVehicleComponent->SetBrakeInput(0);
-		//turn on break lights
-		if (BreakLightsState == true)
-		{
-			BreakLightsState = false;
-			BreakLights(false);
-		}
-	}
-	else
-	{
-		ChaosWheeledVehicleComponent->SetBrakeInput(value * -1);
-		ChaosWheeledVehicleComponent->SetThrottleInput(0);
-		//turn on break lights
-		if (BreakLightsState == false)
-		{
-			BreakLightsState = true;
-			BreakLights(true);
-		}
-	}
+	ChaosWheeledVehicleComponent->SetThrottleInput(value);
+	
 }
 
 void AVehiclePawn::Steer(float value)
