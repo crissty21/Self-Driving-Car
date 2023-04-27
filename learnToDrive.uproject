@@ -12,7 +12,9 @@
 				"AIModule",
 				"ChaosVehicles",
 				"Engine",
-				"Landscape"
+				"Landscape",
+				"NeuralNetworkInference",
+				"CoreUObject"
 			]
 		}
 	],
@@ -43,6 +45,10 @@
 			"SupportedTargetPlatforms": [
 				"Win64"
 			]
+		},
+		{
+			"Name": "NeuralNetworkInference",
+			"Enabled": true
 		}
 	]
 }

@@ -25,6 +25,12 @@ public:
 
 	int8 TickingFreq = 1;
 
+	bool bCaptureData = false;
+	bool bRunModel = false;
+
+	float GetModelOutput();
+	void Init();
+
 protected:
 	virtual void BeginPlay() override;
 	UPROPERTY(EditDefaultsOnly)
@@ -34,16 +40,15 @@ protected:
 
 private:
 	UPROPERTY()
-		UTextureRenderTarget2D* RenderTarget = nullptr;
-	UPROPERTY()
 		FString ImageFilePath;
 	UPROPERTY()
 		FString extension;
-
+	UFUNCTION()
+		TArray<FColor> ReadCamera();
 
 	int32 ImageId = 0;
-	float DT;
 	class ABrain* gameMode = nullptr;
-
+	class UNNI_CNN* NeuralNetwork = nullptr;
 	void SendTrainingData();
+	
 };

@@ -2,8 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "Kismet/KismetRenderingLibrary.h"
-#include "IImageWrapperModule.h"
 #include "IImageWrapper.h"
 
 #include "Brain.generated.h"
@@ -24,8 +22,6 @@ public:
 		int32 VideoHeight = 128;
 	UPROPERTY(EditDefaultsOnly)
 		bool bSaveTrainingData = false;
-	UPROPERTY(EditDefaultsOnly)
-		bool UseLandscapeSplineComponent = false;
 
 	void AddImageToSave(FString path, TArray<FColor> data);
 	void AddDataToSave(TArray<FString> Row);

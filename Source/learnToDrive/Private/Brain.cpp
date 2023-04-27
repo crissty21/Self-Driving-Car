@@ -2,11 +2,12 @@
 
 
 #include "Brain.h"
-#include <Kismet/GameplayStatics.h>
+#include "Kismet/GameplayStatics.h"
 #include "Components/SplineMeshComponent.h"
 #include "Components/SplineComponent.h"
 #include "LandscapeSplinesComponent.h"
 #include "Landscape.h"
+#include "IImageWrapperModule.h"
 #include "Road.h"
 
 
@@ -24,11 +25,9 @@ void ABrain::BeginPlay()
 	IImageWrapperModule& imageWrapperModule = FModuleManager::LoadModuleChecked<IImageWrapperModule>(FName("ImageWrapper"));
 	ImageWrapper = imageWrapperModule.CreateImageWrapper(ImageFormat);
 
-	if (UseLandscapeSplineComponent)
-	{
-		USplineComponent* spline = GetSplineFromRoad();
-		CreateSplineFromLandscape(spline);
-	}
+
+	USplineComponent* spline = GetSplineFromRoad();
+	CreateSplineFromLandscape(spline);
 }
 
 USplineComponent* ABrain::GetSplineFromRoad()
