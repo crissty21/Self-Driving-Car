@@ -5,7 +5,7 @@
 #include "TrainingDataCapturer.h"
 
 UTrainingDataCapturer::UTrainingDataCapturer()
-{
+{ 
     PrimaryComponentTick.bCanEverTick = true;
 
     ImageFilePath = FPaths::ProjectSavedDir() / TEXT("ScreenShots/CameraView");

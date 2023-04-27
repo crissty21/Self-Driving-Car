@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "VehiclePawn.h"
 #include "DrawDebugHelpers.h"
 #include "ChaosWheeledVehicleMovementComponent.h"
@@ -16,7 +13,6 @@ AVehiclePawn::AVehiclePawn()
 	FrontPoint = CreateDefaultSubobject<USceneComponent>("FrontPoint");
 	BackPoint = CreateDefaultSubobject<USceneComponent>("BackPoint");
 	AdvancePoint = CreateDefaultSubobject<USceneComponent>("AdvancePoint");
-
 
 	FrontPoint->SetupAttachment(RootComponent);
 	BackPoint->SetupAttachment(RootComponent);
@@ -42,7 +38,7 @@ void AVehiclePawn::BeginPlay()
 	{
 		FollowedSpline = Road->SplineComp;
 	}
-	
+
 	//steering
 	FrontPoint->SetRelativeLocation(FVector(130, 0, 0));
 	BackPoint->SetRelativeLocation(FVector(-125, 0, 0));
@@ -64,7 +60,7 @@ void AVehiclePawn::BeginPlay()
 			TrainingDataCapturer->bCaptureEveryFrame = false;
 			TrainingDataCapturer->Parent = this;
 			TrainingDataCapturer->PersonalId = PersonalID;
-			TrainingDataCapturer->PrimaryComponentTick.TickInterval = 1.0f / TickingFreq; 
+			TrainingDataCapturer->PrimaryComponentTick.TickInterval = 1.0f / TickingFreq;
 		}
 	}
 	else
@@ -87,7 +83,7 @@ void AVehiclePawn::Tick(float DeltaTime)
 	if (FollowedSpline)
 	{
 		KeepRoad();
-		CruiseControll(DeltaTime);	
+		CruiseControll(DeltaTime);
 	}
 }
 
@@ -110,38 +106,38 @@ void AVehiclePawn::CruiseControll(float DeltaTime)
 	float derivativeError = (errorKPH - PrevSpeedError) / DeltaTime;
 	float d = Kd * derivativeError;
 	//derivate
-	
+
 	PrevSpeedError = errorKPH;
 
 	float value = FMath::Clamp(p + i + d, -1.0f, 1.0f);
-	
+
 	MoveForward(value);
 }
 
 void AVehiclePawn::KeepRoad()
 {
-	
+
 	FVector advancePointCoordinates = AdvancePoint->GetComponentLocation();
 	FVector frontPointCoordinates = FrontPoint->GetComponentLocation();
 	FVector backPointCoordinates = BackPoint->GetComponentLocation();
 
 	//get closest point on spline
-	FVector coordOnSpline = FollowedSpline->FindLocationClosestToWorldLocation(advancePointCoordinates,ESplineCoordinateSpace::World);
+	FVector coordOnSpline = FollowedSpline->FindLocationClosestToWorldLocation(advancePointCoordinates, ESplineCoordinateSpace::World);
 	coordOnSpline.Z = advancePointCoordinates.Z;
 
 	if (DrawLine)
 	{
-		DrawDebugLine(GetWorld(), frontPointCoordinates, coordOnSpline, FColor::Red, false, -1,0,10);
+		DrawDebugLine(GetWorld(), frontPointCoordinates, coordOnSpline, FColor::Red, false, -1, 0, 10);
 	}
 
 	FVector L = frontPointCoordinates - backPointCoordinates;
 	FVector ld = coordOnSpline - backPointCoordinates;
 	float a = L.HeadingAngle() - ld.HeadingAngle();
-	
-	float LDist = FVector::Dist(backPointCoordinates,frontPointCoordinates);
-	float angle = (atan((sin(a)*LDist * 2)/ld.Size()));
 
-	ChaosWheeledVehicleComponent->SetSteeringInput(-angle*2);
+	float LDist = FVector::Dist(backPointCoordinates, frontPointCoordinates);
+	float angle = (atan((sin(a) * LDist * 2) / ld.Size()));
+
+	ChaosWheeledVehicleComponent->SetSteeringInput(-angle * 2);
 
 	//set desired speed in order to be able to take coreners
 	float curentSpeed = GetVehicleMovement()->GetForwardSpeed() * 0.036;
@@ -160,28 +156,15 @@ void AVehiclePawn::MoveForward(float value)
 {
 	if (ChaosWheeledVehicleComponent->GetHandbrakeInput())
 		return;
-	if (value >= -BreakTolerance)
+
+	ChaosWheeledVehicleComponent->SetThrottleInput(value);
+	//turn on break lights
+	if (BreakLightsState == true)
 	{
-		ChaosWheeledVehicleComponent->SetThrottleInput(value);
-		ChaosWheeledVehicleComponent->SetBrakeInput(0);		
-		//turn on break lights
-		if (BreakLightsState == true)
-		{
-			BreakLightsState = false;
-			BreakLights(false);
-		}
+		BreakLightsState = false;
+		BreakLights(false);
 	}
-	else 
-	{
-		ChaosWheeledVehicleComponent->SetBrakeInput(value * -1);
-		ChaosWheeledVehicleComponent->SetThrottleInput(0);
-		//turn on break lights
-		if (BreakLightsState == false)
-		{
-			BreakLightsState = true;
-			BreakLights(true);
-		}
-	}
+
 }
 
 void AVehiclePawn::Steer(float value)
@@ -241,7 +224,7 @@ float AVehiclePawn::GetBreak()
 
 float AVehiclePawn::GetSpeed()
 {
-    if (ChaosWheeledVehicleComponent == nullptr)
+	if (ChaosWheeledVehicleComponent == nullptr)
 	{
 		return 0;
 	}

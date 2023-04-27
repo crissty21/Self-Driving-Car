@@ -2,8 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "Kismet/KismetRenderingLibrary.h"
-#include "IImageWrapperModule.h"
 #include "IImageWrapper.h"
 
 #include "Brain.generated.h"

@@ -2,11 +2,12 @@
 
 
 #include "Brain.h"
-#include <Kismet/GameplayStatics.h>
+#include "Kismet/GameplayStatics.h"
 #include "Components/SplineMeshComponent.h"
 #include "Components/SplineComponent.h"
 #include "LandscapeSplinesComponent.h"
 #include "Landscape.h"
+#include "IImageWrapperModule.h"
 #include "Road.h"
 
 
