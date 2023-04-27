@@ -22,8 +22,6 @@ public:
 		int32 VideoHeight = 128;
 	UPROPERTY(EditDefaultsOnly)
 		bool bSaveTrainingData = false;
-	UPROPERTY(EditDefaultsOnly)
-		bool UseLandscapeSplineComponent = false;
 
 	void AddImageToSave(FString path, TArray<FColor> data);
 	void AddDataToSave(TArray<FString> Row);

@@ -43,6 +43,10 @@
 			"SupportedTargetPlatforms": [
 				"Win64"
 			]
+		},
+		{
+			"Name": "NeuralNetworkInference",
+			"Enabled": true
 		}
 	]
 }

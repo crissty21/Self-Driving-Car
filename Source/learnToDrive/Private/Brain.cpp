@@ -25,11 +25,9 @@ void ABrain::BeginPlay()
 	IImageWrapperModule& imageWrapperModule = FModuleManager::LoadModuleChecked<IImageWrapperModule>(FName("ImageWrapper"));
 	ImageWrapper = imageWrapperModule.CreateImageWrapper(ImageFormat);
 
-	if (UseLandscapeSplineComponent)
-	{
-		USplineComponent* spline = GetSplineFromRoad();
-		CreateSplineFromLandscape(spline);
-	}
+
+	USplineComponent* spline = GetSplineFromRoad();
+	CreateSplineFromLandscape(spline);
 }
 
 USplineComponent* ABrain::GetSplineFromRoad()

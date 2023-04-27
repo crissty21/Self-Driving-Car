@@ -11,7 +11,7 @@
 
 UCLASS()
 class AVehiclePawn : public AWheeledVehiclePawn
-{
+{ 
 	GENERATED_BODY()
 
 public:
@@ -71,6 +71,10 @@ protected:
 		float BreakTolerance = 0.5f;
 	UPROPERTY(EditDefaultsOnly)
 		bool DrawLine = false;
+	UPROPERTY(EditDefaultsOnly, Category="NNI")
+		bool bCaptureData = false;
+	UPROPERTY(EditDefaultsOnly, Category = "NNI")
+		bool bRunModel = false;
 		//PID constants 
 	UPROPERTY(EditAnywhere, Category = "PID constants")
 		float Kp = 0.8f;

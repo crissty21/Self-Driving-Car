@@ -17,6 +17,23 @@ AVehiclePawn::AVehiclePawn()
 	FrontPoint->SetupAttachment(RootComponent);
 	BackPoint->SetupAttachment(RootComponent);
 	AdvancePoint->SetupAttachment(RootComponent);
+
+	FrontPoint->SetRelativeLocation(FVector(130, 0, 0));
+	BackPoint->SetRelativeLocation(FVector(-125, 0, 0));
+	AdvancePoint->SetRelativeLocation(FVector(400, 0, 0));
+
+
+	TrainingDataCapturer = CreateDefaultSubobject<UTrainingDataCapturer>("ImageProcesor");
+	TrainingDataCapturer->SetupAttachment(RootComponent);
+
+	TrainingDataCapturer->SetRelativeLocation(FVector(142, 0, 150));
+	TrainingDataCapturer->SetRelativeRotation(FRotator(-10, 0, 0));
+	TrainingDataCapturer->FOVAngle = 120;
+	TrainingDataCapturer->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
+	TrainingDataCapturer->bCaptureEveryFrame = false;
+	TrainingDataCapturer->Parent = this;
+	TrainingDataCapturer->PrimaryComponentTick.TickInterval = 1.0f / TickingFreq;
+	TrainingDataCapturer->PersonalId = PersonalID;
 }
 
 void AVehiclePawn::BeginPlay()
@@ -28,10 +45,6 @@ void AVehiclePawn::BeginPlay()
 	{
 		UE_LOG(LogTemp, Fatal, TEXT("Invalid cast to UChaosWheeledVehicleMovementComponent in VehiclePawn.cpp"));
 	}
-	BreakLights(false);
-
-	//cruise controll
-	PrevSpeedError = 30.f;
 
 	ARoad* Road = GetClosestRoad();
 	if (Road)
@@ -39,51 +52,25 @@ void AVehiclePawn::BeginPlay()
 		FollowedSpline = Road->SplineComp;
 	}
 
-	//steering
-	FrontPoint->SetRelativeLocation(FVector(130, 0, 0));
-	BackPoint->SetRelativeLocation(FVector(-125, 0, 0));
-	AdvancePoint->SetRelativeLocation(FVector(400, 0, 0));
-
-	ABrain* gameMode = (ABrain*)GetWorld()->GetAuthGameMode();
-	if (gameMode)
-	{
-		if (gameMode->bSaveTrainingData)
-		{
-			TrainingDataCapturer = NewObject<UTrainingDataCapturer>(this, UTrainingDataCapturer::StaticClass(), TEXT("DataCapturerComponent"), RF_Transient);
-			TrainingDataCapturer->RegisterComponent();
-			TrainingDataCapturer->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-
-			TrainingDataCapturer->SetRelativeLocation(FVector(142, 0, 150));
-			TrainingDataCapturer->SetRelativeRotation(FRotator(-10, 0, 0));
-			TrainingDataCapturer->FOVAngle = 120;
-			TrainingDataCapturer->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
-			TrainingDataCapturer->bCaptureEveryFrame = false;
-			TrainingDataCapturer->Parent = this;
-			TrainingDataCapturer->PersonalId = PersonalID;
-			TrainingDataCapturer->PrimaryComponentTick.TickInterval = 1.0f / TickingFreq;
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Unable to cast to ABrain in VehiclePawn!"));
-	}
+	PrevSpeedError = 30.f;
+	BreakLights(false);
 }
 
 void AVehiclePawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (ChaosWheeledVehicleComponent->IsMovingOnGround())
-	{
-		GetMesh()->SetAngularDamping(0);
-	}
-	else
-	{
-		GetMesh()->SetAngularDamping(3);
-	}
 	if (FollowedSpline)
 	{
 		KeepRoad();
 		CruiseControll(DeltaTime);
+	}
+	else
+	{
+		if (bRunModel)
+		{
+			CruiseControll(DeltaTime);
+
+		}
 	}
 }
 
@@ -195,6 +182,39 @@ void AVehiclePawn::ResetCar()
 	GetMesh()->SetPhysicsLinearVelocity(FVector::ZeroVector);
 }
 
+ARoad* AVehiclePawn::GetClosestRoad()
+{
+	TArray<AActor*> roads;
+	UGameplayStatics::GetAllActorsOfClass(this, ARoad::StaticClass(), roads);
+
+	if (roads.IsEmpty())
+	{
+		return nullptr;
+	}
+
+	FVector myLocation = GetActorLocation();
+	AActor* closestActor = nullptr;
+
+	float closestDistance = TNumericLimits<float>::Max();
+
+	for (AActor* actor : roads)
+	{
+		FVector actorLocation = actor->GetActorLocation();
+		float distance = FVector::Distance(actorLocation, myLocation);
+		if (distance < closestDistance)
+		{
+			closestActor = actor;
+			closestDistance = distance;
+		}
+	}
+	if (closestActor == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to find any actor of class ARoad"));
+		return nullptr;
+	}
+	return (ARoad*)closestActor;
+}
+
 float AVehiclePawn::GetSteering()
 {
 	if (ChaosWheeledVehicleComponent == nullptr)
@@ -229,37 +249,4 @@ float AVehiclePawn::GetSpeed()
 		return 0;
 	}
 	return ChaosWheeledVehicleComponent->GetForwardSpeedMPH();
-}
-
-ARoad* AVehiclePawn::GetClosestRoad()
-{
-	TArray<AActor*> roads;
-	UGameplayStatics::GetAllActorsOfClass(this, ARoad::StaticClass(), roads);
-
-	if (roads.IsEmpty())
-	{
-		return nullptr;
-	}
-
-	FVector myLocation = GetActorLocation();
-	AActor* closestActor = nullptr;
-
-	float closestDistance = TNumericLimits<float>::Max();
-
-	for (AActor* actor : roads)
-	{
-		FVector actorLocation = actor->GetActorLocation();
-		float distance = FVector::Distance(actorLocation, myLocation);
-		if (distance < closestDistance)
-		{
-			closestActor = actor;
-			closestDistance = distance;
-		}
-	}
-	if (closestActor == nullptr)
-	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to find any actor of class ARoad"));
-		return nullptr;
-	}
-	return (ARoad*)closestActor;
 }

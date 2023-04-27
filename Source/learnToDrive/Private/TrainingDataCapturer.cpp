@@ -29,15 +29,37 @@ void UTrainingDataCapturer::BeginPlay()
 		VideoWidth = gameMode->VideoWidth;
 	}
 
-    RenderTarget = NewObject<UTextureRenderTarget2D>();
-    RenderTarget->InitCustomFormat(VideoWidth, VideoHeight, PF_B8G8R8A8, false);
-    TextureTarget = RenderTarget;
+	TextureTarget = NewObject<UTextureRenderTarget2D>();
+	TextureTarget->InitCustomFormat(VideoWidth, VideoHeight, PF_B8G8R8A8, false);
+    
 
 }
 void UTrainingDataCapturer::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-    SendTrainingData();
+	if (bCaptureData)
+	{
+		SendTrainingData();
+	}
+	if (bRunModel)
+	{
+
+	}
+}
+
+TArray<FColor> UTrainingDataCapturer::ReadCamera()
+{
+	CaptureScene();
+	TArray<FColor> bitmap;
+
+	//read pixels
+	if (TextureTarget == nullptr)return bitmap;
+	FRenderTarget* renderTargetResource = TextureTarget->GameThread_GetRenderTargetResource();
+	if (!renderTargetResource->ReadPixels(bitmap))
+	{
+		return bitmap;
+	}
+	return bitmap;
 }
 
 void UTrainingDataCapturer::SendTrainingData()
@@ -46,16 +68,9 @@ void UTrainingDataCapturer::SendTrainingData()
 	FString photoPath = FString::Printf(TEXT("%s_%d%d.%s"), *ImageFilePath, PersonalId, ImageId++, *extension);
 
 	// Read the captured data and create an image
-	CaptureScene();
-	TArray<FColor> bitmap;
-
-	//read pixels
-	FRenderTarget* renderTargetResource = RenderTarget->GameThread_GetRenderTargetResource();
-	if (!renderTargetResource->ReadPixels(bitmap))
-	{
-		return;
-	}
-
+	
+	TArray<FColor> bitmap = ReadCamera();
+	if (bitmap.IsEmpty())return;
 	gameMode->AddImageToSave(photoPath, bitmap);
 	
 	//save data to csv 
