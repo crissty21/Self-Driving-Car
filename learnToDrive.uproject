@@ -12,7 +12,9 @@
 				"AIModule",
 				"ChaosVehicles",
 				"Engine",
-				"Landscape"
+				"Landscape",
+				"NeuralNetworkInference",
+				"CoreUObject"
 			]
 		}
 	],

@@ -104,4 +104,6 @@ private:
 	void CruiseControll(float DeltaTime);
 	
 	void KeepRoad();
+
+	void Predict();
 };

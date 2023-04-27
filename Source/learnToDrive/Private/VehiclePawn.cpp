@@ -23,22 +23,21 @@ AVehiclePawn::AVehiclePawn()
 	AdvancePoint->SetRelativeLocation(FVector(400, 0, 0));
 
 
-	TrainingDataCapturer = CreateDefaultSubobject<UTrainingDataCapturer>("ImageProcesor");
-	TrainingDataCapturer->SetupAttachment(RootComponent);
-
-	TrainingDataCapturer->SetRelativeLocation(FVector(142, 0, 150));
-	TrainingDataCapturer->SetRelativeRotation(FRotator(-10, 0, 0));
-	TrainingDataCapturer->FOVAngle = 120;
-	TrainingDataCapturer->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
-	TrainingDataCapturer->bCaptureEveryFrame = false;
-	TrainingDataCapturer->Parent = this;
-	TrainingDataCapturer->PrimaryComponentTick.TickInterval = 1.0f / TickingFreq;
-	TrainingDataCapturer->PersonalId = PersonalID;
 }
 
 void AVehiclePawn::BeginPlay()
 {
 	Super::BeginPlay();
+	TrainingDataCapturer = NewObject<UTrainingDataCapturer>(this, UTrainingDataCapturer::StaticClass(), TEXT("ImageProcesor"));
+	TrainingDataCapturer->RegisterComponent();
+	TrainingDataCapturer->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+
+	TrainingDataCapturer->Parent = this;
+	TrainingDataCapturer->PersonalId = PersonalID;
+	TrainingDataCapturer->bRunModel = bRunModel;
+	TrainingDataCapturer->bCaptureData = bCaptureData;
+	TrainingDataCapturer->PrimaryComponentTick.TickInterval = 1.0f / TickingFreq;
+	TrainingDataCapturer->Init();
 
 	ChaosWheeledVehicleComponent = Cast<UChaosWheeledVehicleMovementComponent>(GetVehicleMovementComponent());
 	if (ChaosWheeledVehicleComponent == nullptr)
@@ -54,6 +53,15 @@ void AVehiclePawn::BeginPlay()
 
 	PrevSpeedError = 30.f;
 	BreakLights(false);
+	// Ensure the actor has an input component
+	if (!InputComponent)
+	{
+		InputComponent = NewObject<UInputComponent>(this);
+		InputComponent->RegisterComponent();
+	}
+
+	// Bind input events
+	InputComponent->BindAction("Predict", IE_Pressed, this, &AVehiclePawn::Predict);
 }
 
 void AVehiclePawn::Tick(float DeltaTime)
@@ -137,6 +145,16 @@ void AVehiclePawn::KeepRoad()
 	else
 		DesiredSpeed = MaxSpeed;
 
+}
+
+void AVehiclePawn::Predict()
+{
+	if (bRunModel)
+	{
+		float out = TrainingDataCapturer->GetModelOutput();
+		UE_LOG(LogTemp, Warning, TEXT("Out: %f"), out);
+		UE_LOG(LogTemp, Warning, TEXT("Real: %f"), GetSteering());
+	}
 }
 
 void AVehiclePawn::MoveForward(float value)

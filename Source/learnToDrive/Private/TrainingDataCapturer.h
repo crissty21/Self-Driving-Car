@@ -28,6 +28,9 @@ public:
 	bool bCaptureData = false;
 	bool bRunModel = false;
 
+	float GetModelOutput();
+	void Init();
+
 protected:
 	virtual void BeginPlay() override;
 	UPROPERTY(EditDefaultsOnly)
@@ -45,6 +48,7 @@ private:
 
 	int32 ImageId = 0;
 	class ABrain* gameMode = nullptr;
-
+	class UNNI_CNN* NeuralNetwork = nullptr;
 	void SendTrainingData();
+	
 };
