@@ -33,13 +33,9 @@ void AVehiclePawn::Tick(float DeltaTime)
 		if (FollowedSpline)
 		{
 			KeepRoad();
-			CruiseControll(DeltaTime);
 		}
 	}
-	else if (DrivingStile == Driving::RunNetwork)
-	{
-		CruiseControll(DeltaTime);
-	}
+	CruiseControll(DeltaTime);
 }
 
 void AVehiclePawn::CruiseControll(float DeltaTime)
@@ -153,9 +149,12 @@ void AVehiclePawn::SetUpInput()
 	InputComponent->BindAction("Predict", IE_Pressed, this, &AVehiclePawn::Predict);
 	if (DrivingStile == Driving::UserControll)
 	{
-		InputComponent->BindAxis("MoveForward", this, &AVehiclePawn::MoveForward);
-		InputComponent->BindAxis("MoveRight", this, &AVehiclePawn::Steer);
-		UE_LOG(LogTemp, Warning, TEXT("DA"))
+		InputComponent->BindAxis("MoveForward", this, &AVehiclePawn::HandleForwardInput);
+		InputComponent->BindAxis("MoveRight", this, &AVehiclePawn::Steer);	
+		InputComponent->BindAction("HandBreak", IE_Pressed, this, &AVehiclePawn::HandBreak);
+		InputComponent->BindAction("HandBreak", IE_Released, this, &AVehiclePawn::HandBreakReleased);
+
+		DesiredSpeed = 0;
 	}
 }
 
@@ -190,8 +189,20 @@ void AVehiclePawn::Predict()
 	}
 }
 
+void AVehiclePawn::HandleForwardInput(float value)
+{
+	if (DesiredSpeed + value * Acceleration > MaxReverse &&
+		DesiredSpeed + value * Acceleration < MaxSpeed)
+	{
+		DesiredSpeed += value * Acceleration;
+		
+	}
+	UE_LOG(LogTemp, Warning, TEXT("%f"), DesiredSpeed);
+}
+
 void AVehiclePawn::MoveForward(float value)
 {
+	
 	if (ChaosWheeledVehicleComponent->GetHandbrakeInput())
 		return;
 

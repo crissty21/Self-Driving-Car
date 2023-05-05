@@ -79,6 +79,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 		float MaxSpeed = 100;
 	UPROPERTY(EditDefaultsOnly)
+		float MaxReverse = -20;
+	UPROPERTY(EditDefaultsOnly)
+		float Acceleration = 1;
+	UPROPERTY(EditDefaultsOnly)
 		float BreakTolerance = 0.5f;
 	UPROPERTY(EditDefaultsOnly)
 		bool DrawLine = false;
@@ -126,4 +130,6 @@ private:
 	void KeepRoad();
 
 	void Predict();
+
+	void HandleForwardInput(float value);
 };
