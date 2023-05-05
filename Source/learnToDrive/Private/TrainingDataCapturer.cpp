@@ -13,27 +13,6 @@ UTrainingDataCapturer::UTrainingDataCapturer()
     extension = TEXT("jpeg");
 }
 
-float UTrainingDataCapturer::GetModelOutput()
-{
-	if (bRunModel == false)return 0;
-	if (NeuralNetwork == nullptr)return 0;
-	return NeuralNetwork->RunModel(ReadCamera(), VideoWidth, VideoHeight);
-	return 0;
-}
-
-void UTrainingDataCapturer::Init()
-{
-	SetRelativeLocation(FVector(142, 0, 150));
-	SetRelativeRotation(FRotator(-10, 0, 0));
-	FOVAngle = 120;
-	CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
-	bCaptureEveryFrame = false;
-	if (bRunModel)
-	{
-		NeuralNetwork = NewObject<UNNI_CNN>();
-	}
-}
-
 void UTrainingDataCapturer::BeginPlay()
 {
     Super::BeginPlay();
@@ -56,6 +35,28 @@ void UTrainingDataCapturer::BeginPlay()
 	TextureTarget->InitCustomFormat(VideoWidth, VideoHeight, PF_B8G8R8A8, false);
 
 }
+
+void UTrainingDataCapturer::Init()
+{
+	SetRelativeLocation(FVector(142, 0, 150));
+	SetRelativeRotation(FRotator(-10, 0, 0));
+	FOVAngle = 120;
+	CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
+	bCaptureEveryFrame = false;
+	if (bRunModel)
+	{
+		NeuralNetwork = NewObject<UNNI_CNN>();
+	}
+}
+
+float UTrainingDataCapturer::GetModelOutput()
+{
+	if (bRunModel == false)return 0;
+	if (NeuralNetwork == nullptr)return 0;
+	return NeuralNetwork->RunModel(ReadCamera(), VideoWidth, VideoHeight);
+	return 0;
+}
+
 void UTrainingDataCapturer::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);

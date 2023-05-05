@@ -9,6 +9,14 @@
 
 #include "VehiclePawn.generated.h"
 
+UENUM()
+enum class Driving : uint8
+{
+	FollowSpline,
+	RunNetwork,
+	UserControll,
+	Max UMETA(Hidden)
+};
 UCLASS()
 class AVehiclePawn : public AWheeledVehiclePawn
 { 
@@ -16,6 +24,8 @@ class AVehiclePawn : public AWheeledVehiclePawn
 
 public:
 	AVehiclePawn();
+
+	void SetUpComponents();
 
 protected:
 	virtual void BeginPlay() override;
@@ -48,6 +58,7 @@ public:
 	UPROPERTY(EditAnywhere)
 		int8 PersonalID = 0;
 
+
 protected:
 	UPROPERTY(EditAnywhere)
 		USceneComponent* FrontPoint = nullptr;
@@ -74,7 +85,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="NNI")
 		bool bCaptureData = false;
 	UPROPERTY(EditDefaultsOnly, Category = "NNI")
-		bool bRunModel = false;
+		Driving DrivingStile = Driving::FollowSpline;
 		//PID constants 
 	UPROPERTY(EditAnywhere, Category = "PID constants")
 		float Kp = 0.8f;
@@ -93,6 +104,15 @@ private:
 		class UChaosWheeledVehicleMovementComponent* ChaosWheeledVehicleComponent = nullptr;
 	UFUNCTION()
 		ARoad* GetClosestRoad();
+	UFUNCTION()
+		void SetUpTrainingDataCapturer();
+	UFUNCTION()
+		void SetUpInput();
+	UFUNCTION()
+		void SetUpRoad();
+	UFUNCTION()
+		void SetUpChaosWheeledVehicleComponent();
+
 	bool CustomBreakSis = false;
 	
 	float PrevSpeedError = 30.f;

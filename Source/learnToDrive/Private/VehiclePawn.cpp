@@ -10,75 +10,35 @@ AVehiclePawn::AVehiclePawn()
 {
 	// setup components
 	PrimaryActorTick.bCanEverTick = true;
-	FrontPoint = CreateDefaultSubobject<USceneComponent>("FrontPoint");
-	BackPoint = CreateDefaultSubobject<USceneComponent>("BackPoint");
-	AdvancePoint = CreateDefaultSubobject<USceneComponent>("AdvancePoint");
-
-	FrontPoint->SetupAttachment(RootComponent);
-	BackPoint->SetupAttachment(RootComponent);
-	AdvancePoint->SetupAttachment(RootComponent);
-
-	FrontPoint->SetRelativeLocation(FVector(130, 0, 0));
-	BackPoint->SetRelativeLocation(FVector(-125, 0, 0));
-	AdvancePoint->SetRelativeLocation(FVector(400, 0, 0));
-
-
+	SetUpComponents();
+	PrevSpeedError = 30.f;
 }
+
 
 void AVehiclePawn::BeginPlay()
 {
 	Super::BeginPlay();
-	TrainingDataCapturer = NewObject<UTrainingDataCapturer>(this, UTrainingDataCapturer::StaticClass(), TEXT("ImageProcesor"));
-	TrainingDataCapturer->RegisterComponent();
-	TrainingDataCapturer->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-
-	TrainingDataCapturer->Parent = this;
-	TrainingDataCapturer->PersonalId = PersonalID;
-	TrainingDataCapturer->bRunModel = bRunModel;
-	TrainingDataCapturer->bCaptureData = bCaptureData;
-	TrainingDataCapturer->PrimaryComponentTick.TickInterval = 1.0f / TickingFreq;
-	TrainingDataCapturer->Init();
-
-	ChaosWheeledVehicleComponent = Cast<UChaosWheeledVehicleMovementComponent>(GetVehicleMovementComponent());
-	if (ChaosWheeledVehicleComponent == nullptr)
-	{
-		UE_LOG(LogTemp, Fatal, TEXT("Invalid cast to UChaosWheeledVehicleMovementComponent in VehiclePawn.cpp"));
-	}
-
-	ARoad* Road = GetClosestRoad();
-	if (Road)
-	{
-		FollowedSpline = Road->SplineComp;
-	}
-
-	PrevSpeedError = 30.f;
+	SetUpTrainingDataCapturer();
+	SetUpChaosWheeledVehicleComponent();
+	SetUpRoad();
 	BreakLights(false);
-	// Ensure the actor has an input component
-	if (!InputComponent)
-	{
-		InputComponent = NewObject<UInputComponent>(this);
-		InputComponent->RegisterComponent();
-	}
-
-	// Bind input events
-	InputComponent->BindAction("Predict", IE_Pressed, this, &AVehiclePawn::Predict);
+	SetUpInput();
 }
 
 void AVehiclePawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (FollowedSpline)
+	if (DrivingStile == Driving::FollowSpline)
 	{
-		KeepRoad();
-		CruiseControll(DeltaTime);
-	}
-	else
-	{
-		if (bRunModel)
+		if (FollowedSpline)
 		{
+			KeepRoad();
 			CruiseControll(DeltaTime);
-
 		}
+	}
+	else if (DrivingStile == Driving::RunNetwork)
+	{
+		CruiseControll(DeltaTime);
 	}
 }
 
@@ -147,9 +107,82 @@ void AVehiclePawn::KeepRoad()
 
 }
 
+void AVehiclePawn::SetUpComponents()
+{
+	FrontPoint = CreateDefaultSubobject<USceneComponent>("FrontPoint");
+	BackPoint = CreateDefaultSubobject<USceneComponent>("BackPoint");
+	AdvancePoint = CreateDefaultSubobject<USceneComponent>("AdvancePoint");
+
+	FrontPoint->SetupAttachment(RootComponent);
+	BackPoint->SetupAttachment(RootComponent);
+	AdvancePoint->SetupAttachment(RootComponent);
+
+	FrontPoint->SetRelativeLocation(FVector(130, 0, 0));
+	BackPoint->SetRelativeLocation(FVector(-125, 0, 0));
+	AdvancePoint->SetRelativeLocation(FVector(400, 0, 0));
+}
+
+void AVehiclePawn::SetUpRoad()
+{
+	ARoad* Road = GetClosestRoad();
+	if (Road)
+	{
+		FollowedSpline = Road->SplineComp;
+	}
+}
+
+void AVehiclePawn::SetUpChaosWheeledVehicleComponent()
+{
+	ChaosWheeledVehicleComponent = Cast<UChaosWheeledVehicleMovementComponent>(GetVehicleMovementComponent());
+	if (ChaosWheeledVehicleComponent == nullptr)
+	{
+		UE_LOG(LogTemp, Fatal, TEXT("Invalid cast to UChaosWheeledVehicleMovementComponent in VehiclePawn.cpp"));
+	}
+}
+
+void AVehiclePawn::SetUpInput()
+{
+	// Ensure the actor has an input component
+	if (!InputComponent)
+	{
+		InputComponent = NewObject<UInputComponent>(this);
+		InputComponent->RegisterComponent();
+	}
+
+	// Bind input events
+	InputComponent->BindAction("Predict", IE_Pressed, this, &AVehiclePawn::Predict);
+	if (DrivingStile == Driving::UserControll)
+	{
+		InputComponent->BindAxis("MoveForward", this, &AVehiclePawn::MoveForward);
+		InputComponent->BindAxis("MoveRight", this, &AVehiclePawn::Steer);
+		UE_LOG(LogTemp, Warning, TEXT("DA"))
+	}
+}
+
+void AVehiclePawn::SetUpTrainingDataCapturer()
+{
+	TrainingDataCapturer = NewObject<UTrainingDataCapturer>(this, UTrainingDataCapturer::StaticClass(), TEXT("ImageProcesor"));
+	TrainingDataCapturer->RegisterComponent();
+	TrainingDataCapturer->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+
+	TrainingDataCapturer->Parent = this;
+	TrainingDataCapturer->PersonalId = PersonalID;
+	if (DrivingStile == Driving::RunNetwork)
+	{
+		TrainingDataCapturer->bRunModel = true;
+	}
+	else
+	{
+		TrainingDataCapturer->bRunModel = false;
+	}
+	TrainingDataCapturer->bCaptureData = bCaptureData;
+	TrainingDataCapturer->PrimaryComponentTick.TickInterval = 1.0f / TickingFreq;
+	TrainingDataCapturer->Init();
+}
+
 void AVehiclePawn::Predict()
 {
-	if (bRunModel)
+	if (DrivingStile == Driving::RunNetwork)
 	{
 		float out = TrainingDataCapturer->GetModelOutput();
 		UE_LOG(LogTemp, Warning, TEXT("Out: %f"), out);
