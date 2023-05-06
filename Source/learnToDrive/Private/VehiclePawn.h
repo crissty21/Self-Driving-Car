@@ -57,7 +57,7 @@ public:
 
 	UPROPERTY(EditAnywhere)
 		int8 PersonalID = 0;
-
+	float steerFromNN = 0;
 
 protected:
 	UPROPERTY(EditAnywhere)

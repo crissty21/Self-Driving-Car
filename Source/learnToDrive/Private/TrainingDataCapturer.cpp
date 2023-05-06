@@ -66,7 +66,10 @@ void UTrainingDataCapturer::TickComponent(float DeltaTime, ELevelTick TickType, 
 	}
 	if (bRunModel)
 	{
-
+		if (Parent != nullptr)
+		{
+			Parent->steerFromNN = GetModelOutput();
+		}
 	}
 }
 

@@ -52,16 +52,16 @@ float UNNI_CNN::RunModel(TArray<FColor> image, int16 width, int16 height)
 	cv::Mat colorData = cv::Mat(cv::Size(width, height), CV_8UC4, image.GetData());
 	// Fill input neural tensor
 	const TArray<float> InArray = PreProcessImage(colorData);
-	Network->SetInputFromArrayCopy(InArray);
+	Network->SetInputFromVoidPointerCopy(&InArray);
 
 	// Run UNeuralNetwork
 	Network->Run();
 
-	UE_LOG(LogTemp, Log, TEXT("Neural Network Inference complete."))
 		//Read and print OutputTensor
 		//const FNeuralTensor& OutputTensor = Network->GetOutputTensor();
 		TArray<float> OutputTensor = Network->GetOutputTensor().GetArrayCopy<float>();
 	result = OutputTensor[0];
+	UE_LOG(LogTemp, Log, TEXT("Neural Network Inference complete. Output: %f"), result)
 
 	return result;
 }

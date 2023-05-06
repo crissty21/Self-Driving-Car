@@ -35,6 +35,10 @@ void AVehiclePawn::Tick(float DeltaTime)
 			KeepRoad();
 		}
 	}
+	else if (DrivingStile == Driving::RunNetwork)
+	{
+		Steer(steerFromNN);
+	}
 	CruiseControll(DeltaTime);
 }
 
@@ -176,6 +180,7 @@ void AVehiclePawn::SetUpTrainingDataCapturer()
 	}
 	TrainingDataCapturer->bCaptureData = bCaptureData;
 	TrainingDataCapturer->PrimaryComponentTick.TickInterval = 1.0f / TickingFreq;
+
 	TrainingDataCapturer->Init();
 }
 
@@ -197,7 +202,6 @@ void AVehiclePawn::HandleForwardInput(float value)
 		DesiredSpeed += value * Acceleration;
 		
 	}
-	UE_LOG(LogTemp, Warning, TEXT("%f"), DesiredSpeed);
 }
 
 void AVehiclePawn::MoveForward(float value)
@@ -219,6 +223,7 @@ void AVehiclePawn::MoveForward(float value)
 void AVehiclePawn::Steer(float value)
 {
 	ChaosWheeledVehicleComponent->SetSteeringInput(value);
+	//UE_LOG(LogTemp, Warning, TEXT("value: %f , real: % f"), value, ChaosWheeledVehicleComponent->GetSteeringInput())
 }
 
 void AVehiclePawn::HandBreak()
