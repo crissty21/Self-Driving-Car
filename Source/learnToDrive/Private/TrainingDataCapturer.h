@@ -47,8 +47,10 @@ private:
 		TArray<FColor> ReadCamera();
 
 	int32 ImageId = 0;
-	class ABrain* gameMode = nullptr;
-	class UNNI_CNN* NeuralNetwork = nullptr;
+	UPROPERTY()
+		class ABrain* gameMode = nullptr;
+	UPROPERTY()
+		class UNNI_CNN* NeuralNetwork = nullptr;
 	void SendTrainingData();
 	
 };

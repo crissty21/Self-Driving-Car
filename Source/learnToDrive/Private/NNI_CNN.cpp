@@ -18,7 +18,7 @@
 
 UNNI_CNN::UNNI_CNN()
 {
-	const FString& ONNXModelFilePath = TEXT("C:/Users/crist/Desktop/The_Model1.onnx");
+	const FString& ONNXModelFilePath = TEXT("C:/Users/crist/Desktop/The_Model3.onnx");
 	// Create Network object if null
 	if (Network == nullptr) {
 		Network = NewObject<UNeuralNetwork>((UObject*)GetTransientPackage(), UNeuralNetwork::StaticClass());
@@ -51,8 +51,11 @@ float UNNI_CNN::RunModel(TArray<FColor> image, int16 width, int16 height)
 	//create a mat with the data from pixels 
 	cv::Mat colorData = cv::Mat(cv::Size(width, height), CV_8UC4, image.GetData());
 	// Fill input neural tensor
-	const TArray<float> InArray = PreProcessImage(colorData);
-	Network->SetInputFromVoidPointerCopy(&InArray);
+	InArray = PreProcessImage(colorData);
+
+	Network->SetInputFromArrayCopy(InArray);
+
+	
 
 	// Run UNeuralNetwork
 	Network->Run();
@@ -72,7 +75,7 @@ TArray<float> UNNI_CNN::PreProcessImage(cv::Mat image)
 	}
 
 	// Crop image to remove unnecessary features
-	//image = image(cv::Rect(0, 60, image.cols, 140));
+	image = image(cv::Range(60, image.rows), cv::Range::all());
 	cv::cvtColor(image, image, cv::COLOR_BGRA2RGB);
 	cv::GaussianBlur(image, image, cv::Size(3, 3), 0);
 	cv::resize(image, image, cv::Size(100, 100));

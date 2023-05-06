@@ -57,7 +57,8 @@ public:
 
 	UPROPERTY(EditAnywhere)
 		int8 PersonalID = 0;
-	float steerFromNN = 0;
+	UPROPERTY()
+		float steerFromNN = 0;
 
 protected:
 	UPROPERTY(EditAnywhere)
@@ -116,6 +117,14 @@ private:
 		void SetUpRoad();
 	UFUNCTION()
 		void SetUpChaosWheeledVehicleComponent();
+	UFUNCTION()
+		void CruiseControll(float DeltaTime);
+	UFUNCTION()
+		void KeepRoad();
+	UFUNCTION()
+		void Predict();
+	UFUNCTION()
+		void HandleForwardInput(float value);
 
 	bool CustomBreakSis = false;
 	
@@ -124,12 +133,4 @@ private:
 	float IntegralError = 0.0f;
 
 	bool BreakLightsState = false;
-	
-	void CruiseControll(float DeltaTime);
-	
-	void KeepRoad();
-
-	void Predict();
-
-	void HandleForwardInput(float value);
 };

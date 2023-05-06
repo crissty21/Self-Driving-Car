@@ -40,6 +40,7 @@ void AVehiclePawn::Tick(float DeltaTime)
 		Steer(steerFromNN);
 	}
 	CruiseControll(DeltaTime);
+
 }
 
 void AVehiclePawn::CruiseControll(float DeltaTime)

@@ -19,7 +19,12 @@ public:
 	UNNI_CNN();
 	UPROPERTY(Transient)
 		class UNeuralNetwork* Network = nullptr;
-	float RunModel(TArray<FColor> image, int16 width, int16 height);
+	UFUNCTION()
+		float RunModel(TArray<FColor> image, int16 width, int16 height);
+	
 	TArray<float> PreProcessImage(cv::Mat image);
 
+private:
+	UPROPERTY(Transient)
+		TArray<float> InArray;
 };
