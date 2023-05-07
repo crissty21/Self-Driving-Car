@@ -25,6 +25,7 @@ public:
 
 	void AddImageToSave(FString path, TArray<FColor> data);
 	void AddDataToSave(TArray<FString> Row);
+	void SetupFollowSpline();
 	
 protected:
 	// Called when the game starts or when spawned
@@ -33,6 +34,7 @@ protected:
 private:
 	class USplineComponent* GetSplineFromRoad();
 
+	bool CreatedSpline = false;
 	void CreateSplineFromLandscape(class USplineComponent* spline);
 
 	EImageFormat ImageFormat;

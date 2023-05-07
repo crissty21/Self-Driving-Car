@@ -17,6 +17,7 @@ ABrain::ABrain()
 	PrimaryActorTick.bCanEverTick = true;
 	ImageFormat = EImageFormat::JPEG;
 	CsvFilePath = FPaths::ProjectSavedDir() / TEXT("Data.csv");
+	CreatedSpline = false;
 }
 void ABrain::BeginPlay()
 {
@@ -25,9 +26,7 @@ void ABrain::BeginPlay()
 	IImageWrapperModule& imageWrapperModule = FModuleManager::LoadModuleChecked<IImageWrapperModule>(FName("ImageWrapper"));
 	ImageWrapper = imageWrapperModule.CreateImageWrapper(ImageFormat);
 
-
-	USplineComponent* spline = GetSplineFromRoad();
-	CreateSplineFromLandscape(spline);
+;
 }
 
 USplineComponent* ABrain::GetSplineFromRoad()
@@ -72,7 +71,7 @@ void ABrain::CreateSplineFromLandscape(USplineComponent* spline)
 	int32 index = 0;
 	for (USceneComponent* it : sceneComponents)
 	{
-		//drop hald of the points 
+		//drop half of the points 
 		if (index++ % 2 == 0)
 		{
 			continue;
@@ -218,4 +217,15 @@ void ABrain::AddImageToSave(FString path, TArray<FColor> data)
 void ABrain::AddDataToSave(TArray<FString> row)
 {
 	CSVdata.Enqueue(row);
+}
+
+void ABrain::SetupFollowSpline()
+{
+	if (!CreatedSpline)
+	{
+		CreatedSpline = true;
+
+		USplineComponent* spline = GetSplineFromRoad();
+		CreateSplineFromLandscape(spline);
+	}
 }

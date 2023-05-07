@@ -142,10 +142,15 @@ void AVehiclePawn::SetUpComponents()
 
 void AVehiclePawn::SetUpRoad()
 {
-	ARoad* Road = GetClosestRoad();
-	if (Road)
+	ABrain* gameMode = (ABrain*)GetWorld()->GetAuthGameMode();
+	if (DrivingStile == Driving::FollowSpline)
 	{
-		FollowedSpline = Road->SplineComp;
+		gameMode->SetupFollowSpline();
+		ARoad* Road = GetClosestRoad();
+		if (Road)
+		{
+			FollowedSpline = Road->SplineComp;
+		}
 	}
 }
 
