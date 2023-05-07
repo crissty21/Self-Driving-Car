@@ -1,8 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "Brain.h"
 #include "VehiclePawn.h"
 #include "NNI_CNN.h"
+#include "CarCameraWidget.h"
+#include "Components/Image.h"
 #include "TrainingDataCapturer.h"
 
 UTrainingDataCapturer::UTrainingDataCapturer()
@@ -11,12 +11,12 @@ UTrainingDataCapturer::UTrainingDataCapturer()
 
     ImageFilePath = FPaths::ProjectSavedDir() / TEXT("ScreenShots/CameraView");
     extension = TEXT("jpeg");
+
 }
 
 void UTrainingDataCapturer::BeginPlay()
 {
     Super::BeginPlay();
-	
 
 	gameMode = (ABrain*)GetWorld()->GetAuthGameMode();
 	if (gameMode == nullptr)
@@ -85,6 +85,8 @@ TArray<FColor> UTrainingDataCapturer::ReadCamera()
 	{
 		return bitmap;
 	}
+
+	Parent->UpdateWidget(bitmap);
 	return bitmap;
 }
 
@@ -120,5 +122,7 @@ void UTrainingDataCapturer::SendTrainingData()
 	};
 	gameMode->AddDataToSave(dataRow);
 }
+
+
 
 

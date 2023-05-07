@@ -14,7 +14,8 @@
 				"Engine",
 				"Landscape",
 				"NeuralNetworkInference",
-				"CoreUObject"
+				"CoreUObject",
+				"UMG"
 			]
 		}
 	],

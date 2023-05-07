@@ -29,13 +29,17 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 
 	UFUNCTION(BlueprintImplementableEvent)
 		void BreakLights(bool state);
+	UFUNCTION(BlueprintImplementableEvent)
+		void ChangeImage();
 
 public:
 	virtual void Tick(float DeltaTime) override;
-
+	UFUNCTION()
+		void UpdateWidget(TArray<FColor> newImage);
 	UFUNCTION(BlueprintCallable, Category="Movement")
 		void MoveForward(float value);
 	UFUNCTION(BlueprintCallable, Category = "Movement")
@@ -73,6 +77,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float DesiredSpeed = 80.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		TArray<FColor> Image;
 	UPROPERTY(EditDefaultsOnly)
 		int8 TickingFreq = 1;
 	UPROPERTY(EditDefaultsOnly)

@@ -52,5 +52,5 @@ private:
 	UPROPERTY()
 		class UNNI_CNN* NeuralNetwork = nullptr;
 	void SendTrainingData();
-	
+
 };

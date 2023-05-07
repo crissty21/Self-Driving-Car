@@ -3,6 +3,7 @@
 #include "ChaosWheeledVehicleMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/SplineComponent.h"
+#include "SpeedChange.h"
 
 #include "Brain.h"
 
@@ -25,6 +26,20 @@ void AVehiclePawn::BeginPlay()
 	SetUpInput();
 }
 
+void AVehiclePawn::NotifyActorBeginOverlap(AActor* OtherActor)
+{
+	Super::NotifyActorBeginOverlap(OtherActor);
+
+	if (OtherActor && OtherActor != this)
+	{
+		ASpeedChange* TriggerVolume = Cast<ASpeedChange>(OtherActor);
+		if (TriggerVolume)
+		{
+			DesiredSpeed = TriggerVolume->NewSpeed;
+		}
+	}
+}
+
 void AVehiclePawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -41,6 +56,12 @@ void AVehiclePawn::Tick(float DeltaTime)
 	}
 	CruiseControll(DeltaTime);
 
+}
+
+void AVehiclePawn::UpdateWidget(TArray<FColor> newImage)
+{
+	Image = newImage;
+	ChangeImage();
 }
 
 void AVehiclePawn::CruiseControll(float DeltaTime)
