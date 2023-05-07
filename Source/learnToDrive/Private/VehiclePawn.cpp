@@ -36,6 +36,7 @@ void AVehiclePawn::NotifyActorBeginOverlap(AActor* OtherActor)
 		if (TriggerVolume)
 		{
 			DesiredSpeed = TriggerVolume->NewSpeed;
+			ChangeMaxSpeedDisplay(DesiredSpeed);
 		}
 	}
 }

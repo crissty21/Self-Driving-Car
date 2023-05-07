@@ -33,8 +33,11 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent)
 		void BreakLights(bool state);
+	UFUNCTION(BlueprintImplementableEvent)
+		void ChangeMaxSpeedDisplay(float value);
 
 public:
+
 	virtual void Tick(float DeltaTime) override;
 	UFUNCTION(BlueprintImplementableEvent)
 		void ChangeText(float value);
