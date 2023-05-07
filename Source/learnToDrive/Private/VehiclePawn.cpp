@@ -58,11 +58,6 @@ void AVehiclePawn::Tick(float DeltaTime)
 
 }
 
-void AVehiclePawn::UpdateWidget(TArray<FColor> newImage)
-{
-	Image = newImage;
-	ChangeImage();
-}
 
 void AVehiclePawn::CruiseControll(float DeltaTime)
 {

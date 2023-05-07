@@ -33,7 +33,6 @@ void UTrainingDataCapturer::BeginPlay()
 
 	TextureTarget = NewObject<UTextureRenderTarget2D>();
 	TextureTarget->InitCustomFormat(VideoWidth, VideoHeight, PF_B8G8R8A8, false);
-
 }
 
 void UTrainingDataCapturer::Init()
@@ -69,6 +68,7 @@ void UTrainingDataCapturer::TickComponent(float DeltaTime, ELevelTick TickType, 
 		if (Parent != nullptr)
 		{
 			Parent->steerFromNN = GetModelOutput();
+			Parent->ChangeText(Parent->steerFromNN);
 		}
 	}
 }
@@ -85,8 +85,6 @@ TArray<FColor> UTrainingDataCapturer::ReadCamera()
 	{
 		return bitmap;
 	}
-
-	Parent->UpdateWidget(bitmap);
 	return bitmap;
 }
 
