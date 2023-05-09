@@ -186,6 +186,7 @@ bool ABrain::SaveCameraViewToDisk(const FString& filePath, TArray<FColor> bitmap
 
 void ABrain::SaveTrainingData()
 {
+
 	if (photos.IsEmpty() == false)
 	{
 		TPair<FString, TArray<FColor>>* currentPhoto = photos.Peek();

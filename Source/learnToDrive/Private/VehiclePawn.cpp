@@ -63,7 +63,7 @@ void AVehiclePawn::Tick(float DeltaTime)
 void AVehiclePawn::CruiseControll(float DeltaTime)
 {
 	//current speed
-	float KPH = GetVehicleMovement()->GetForwardSpeed() * 0.036f;
+	float KPH = GetVehicleMovement()->GetForwardSpeed() * 0.036f ;
 	//error
 	float errorKPH = DesiredSpeed - KPH;
 
