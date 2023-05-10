@@ -18,7 +18,7 @@
 
 UNNI_CNN::UNNI_CNN()
 {
-	const FString& ONNXModelFilePath = TEXT("C:/Users/crist/Desktop/The_Model3.onnx");
+	const FString& ONNXModelFilePath = FPaths::ProjectDir() / TEXT("The_Model3.onnx");
 	// Create Network object if null
 	if (Network == nullptr) {
 		Network = NewObject<UNeuralNetwork>((UObject*)GetTransientPackage(), UNeuralNetwork::StaticClass());

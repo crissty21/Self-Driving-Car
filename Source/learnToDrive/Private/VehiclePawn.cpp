@@ -4,6 +4,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/SplineComponent.h"
 #include "SpeedChange.h"
+#include "SpeedChanger.h"
 
 #include "Brain.h"
 
@@ -32,10 +33,10 @@ void AVehiclePawn::NotifyActorBeginOverlap(AActor* OtherActor)
 
 	if (OtherActor && OtherActor != this)
 	{
-		ASpeedChange* TriggerVolume = Cast<ASpeedChange>(OtherActor);
+		ASpeedChanger* TriggerVolume = Cast<ASpeedChanger>(OtherActor);
 		if (TriggerVolume)
 		{
-			DesiredSpeed = TriggerVolume->NewSpeed;
+			DesiredSpeed = TriggerVolume->GetNewSpeed();
 			ChangeMaxSpeedDisplay(DesiredSpeed);
 		}
 	}
